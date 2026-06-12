@@ -45,8 +45,11 @@ FOREIGN KEY (cpfCliente) REFERENCES cliente(cpfCliente) ON DELETE CASCADE
 insert into funcionario (nomeFunc, loginFunc, senhaFunc)
 values ('admin', 'admin', 'admin');
 
+insert into funcionario (nomeFunc, loginFunc, senhaFunc)
+values ('Fernanda', 'fe', '123');
+
 insert into cliente (cpfCliente, nomeCliente, telefoneCliente, emailCliente)
-values ('00000000001', 'Marcos Alberto Pereira', '4740028922', 'testando@gmail.com');
+values ('000.000.000-01', 'Marcos Alberto Pereira', '(47)94002-8922', 'testando@gmail.com');
 
 insert into livros (tituloLivro, generoLivro, editoraLivro, autorLivro, flgDisponivel)
 values ('As longas tranças de um careca', 'Terror', 'Aquela Ali', 'Ronaldo', TRUE);

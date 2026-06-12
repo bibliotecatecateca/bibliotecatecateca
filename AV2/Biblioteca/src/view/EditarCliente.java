@@ -26,6 +26,16 @@ public class EditarCliente extends JFrame {
     private JTextField tfNome;
     private JTextField tfTelefone;
     private JTextField tfEmail;
+    
+    private String limparTelefone(String telefone) {
+        return telefone.replaceAll("[^0-9]", "");
+    }
+
+    private String formatarTelefone(String telefone) {
+        return "(" + telefone.substring(0, 2) + ") " +
+               telefone.substring(2, 7) + "-" +
+               telefone.substring(7, 11);
+    }
 
     public EditarCliente(Cliente cliente, ClientesAtivos telaClientes) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -89,14 +99,27 @@ public class EditarCliente extends JFrame {
         btnAtualizar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                String nome = tfNome.getText();
-                String telefone = tfTelefone.getText();
-                String email = tfEmail.getText();
+                String nome = tfNome.getText().trim();
+                String telefoneDigitado = tfTelefone.getText().trim();
+                String email = tfEmail.getText().trim();
 
-                if (nome.isEmpty() || telefone.isEmpty() || email.isEmpty()) {
+                String telefoneLimpo = limparTelefone(telefoneDigitado);
+
+                if (nome.isEmpty() || telefoneDigitado.isEmpty() || email.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Preencha todos os campos.");
                     return;
                 }
+
+                if (telefoneLimpo.length() != 11) {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Telefone inválido. Digite exatamente 11 números. Exemplo: 11987654321"
+                    );
+                    return;
+                }
+
+                String telefone = formatarTelefone(telefoneLimpo);
+                tfTelefone.setText(telefone);
 
                 cliente.setNome(nome);
                 cliente.setTelefone(telefone);
