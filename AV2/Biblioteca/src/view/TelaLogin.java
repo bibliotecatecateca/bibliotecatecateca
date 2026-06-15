@@ -1,8 +1,6 @@
 package view;
 
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -19,7 +17,7 @@ import javax.swing.border.EmptyBorder;
 import dao.FuncionarioDAO;
 import model.ConexaoBD;
 import model.Funcionario;
-import model.LoginFunc;
+import model.LoginFuncionario;
 
 public class TelaLogin extends JFrame {
 
@@ -70,41 +68,45 @@ public class TelaLogin extends JFrame {
 		contentPane.add(pfSenha);
 		
 		JButton btnEntrar = new JButton("Entrar");
-		btnEntrar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		
 		
 		btnEntrar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				//Pega os campos digitados
 				String usuario = tfUsuario.getText();
 				String senha = String.valueOf(pfSenha.getPassword());
-				//LoginFunc login = new LoginFunc(4574, "1", "1");
 				
-				LoginFunc login = new LoginFunc(usuario, senha);
+				//Cria um objeto login para passar de parametro na criação do objeto funcionario
+				LoginFuncionario login = new LoginFuncionario(usuario, senha);
 				Funcionario func = new Funcionario(login);
 				
 				ConexaoBD bd = new ConexaoBD();
 	         	if (bd.connect()) {
 	         		FuncionarioDAO loginDao = new FuncionarioDAO(bd, func);
 	         		
+	         		//Busca o funcionário no banco de dados retorna true se encontrar e false se não encontrar
 	         		boolean estado = loginDao.buscar();
 	         		bd.close();
 	         		
-	         		
+	         		//Se retornou true
 	         		if(estado) {
+	         			//Valida se o usuário e a senha estão corretos
 	         			if (login.validarLogin(usuario,senha)) {
 	         				JOptionPane.showMessageDialog(null, "Login realizado!");
+	         				
+	         				//Se o ID do funcionário for 1, abre a tela
 	         				if(func.getIdFunc() == 1) {
-	         					TelaADM telaADM = new TelaADM();
+	         					TelaAdministrador telaADM = new TelaAdministrador();
 	         					telaADM.setVisible(true);
+	         				
 	         				} else {
+	         					
+	         					//Se for outro ID abre a TelaPrincipal
 		         				TelaPrincipal tela = new TelaPrincipal();
 		         				tela.setVisible(true);
 	         					
 	         				}
+	         				// Fecha a tela de login
 	         				dispose();
 	         			} else {
 	         				JOptionPane.showMessageDialog( null, "Login ou Senha incorretas!", "Informação", JOptionPane.ERROR_MESSAGE );

@@ -27,9 +27,8 @@ public class CadastroLivro extends JFrame {
 	private JTextField tfTitulo;
 	private JTextField tfEditora;
 
-	/**
-	 * Create the frame.
-	 */
+
+	//Recebe a aba de livros como parâmetro para atualizar a tabela após o cadastro
 	public CadastroLivro(AbaLivros abaLivros) {
 	    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -70,66 +69,64 @@ public class CadastroLivro extends JFrame {
 		tfAutor.setColumns(10);
 		
 		JButton btnCadastrar = new JButton("Cadastrar");
+		btnCadastrar.setBounds(98, 216, 95, 22);
+		contentPane.add(btnCadastrar);
+		
+		
 		btnCadastrar.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				//Pegar tudo digitado em cada textfield
-		        String titulo = tfTitulo.getText();
-		        String autor = tfAutor.getText();
-		        String genero = tfGenero.getText();
-		        String editora = tfEditora.getText();
-		        
-		        //Confirmar que nenhum ficou vazio e se ficou printar mensagem na tela
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		    	
+		    	//Pega o que foi digitado e remove os espaços extras com o .trim()
+		        String titulo = tfTitulo.getText().trim();
+		        String autor = tfAutor.getText().trim();
+		        String genero = tfGenero.getText().trim();
+		        String editora = tfEditora.getText().trim();
+
+		        //Verefica se nenhum campo ficou vazio e caso esteja printa uma mensagem na telan interrompendo o cadastro
 		        if (titulo.isEmpty() || autor.isEmpty() || genero.isEmpty() || editora.isEmpty()) {
 		            JOptionPane.showMessageDialog(null, "Preencha todos os campos.");
 		            return;
 		        }
-		        
-		        //Criar um objeto da classe livro
+
+		        //Cria um novo objeto livro
 		        Livro livro = new Livro();
 
-		        //Definir os atributos do objeto livro com os dados preenchidos no tf
+		        //Define todos os dados com o que foi digitado nos campos 
 		        livro.setTitulo(titulo);
 		        livro.setAutor(autor);
 		        livro.setGenero(genero);
 		        livro.setEditora(editora);
-		        
-		 
-		        
-		        //Criar um objeto para poder estabelecer a conexão
+
 		        ConexaoBD bd = new ConexaoBD();
 
-		        
 		        if (bd.connect()) {
 		            LivroDAO livroDao = new LivroDAO(bd, livro);
-
+		            
+		            //Cadastra o livro no banco de dados
 		            String mensagem = livroDao.atualizar(TipoAtualizaBD.Criar);
 
 		            JOptionPane.showMessageDialog(null, mensagem);
 
 		            bd.close();
-		            
-		            if (abaLivros != null) {
-		                abaLivros.buscarLivros();
-		            }
+
+		            //Atualiza a lista de livros na tela AbaLivros
+		            abaLivros.buscarLivros();
+		           
 
 		            dispose();
-		            
+
 		        } else {
 		            JOptionPane.showMessageDialog(null, "Erro ao conectar com o banco de dados.");
 		        }
-			
-				
-			}
+		    }
 		});
-		
-		btnCadastrar.setBounds(103, 216, 95, 22);
-		contentPane.add(btnCadastrar);
 		
 		JButton btnVoltar = new JButton("Voltar");
 		btnVoltar.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				//fecha a tela CadastroLivro quando apertar em voltar
 				dispose();
 			}
 		});
@@ -157,7 +154,8 @@ public class CadastroLivro extends JFrame {
 		tfEditora.setBounds(243, 158, 170, 18);
 		contentPane.add(tfEditora);
 		tfEditora.setColumns(10);
+		
+
 
 	}
-
 }

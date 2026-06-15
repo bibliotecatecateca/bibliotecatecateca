@@ -48,7 +48,10 @@ public class EmprestimoAtivo extends JFrame {
         lblTitulo.setBounds(220, 22, 250, 31);
         contentPane.add(lblTitulo);
 
+        //Cria o modelo da tabela
         modeloTabela = new DefaultTableModel();
+        
+        //Adiciona as colunas da tabela        
         modeloTabela.addColumn("ID");
         modeloTabela.addColumn("Livro");
         modeloTabela.addColumn("Data Empréstimo");
@@ -56,8 +59,10 @@ public class EmprestimoAtivo extends JFrame {
         modeloTabela.addColumn("Excluir");
         modeloTabela.addColumn("Finalizar");
 
+        //Cria a tabela usando o modelo criado acima
         tabela = new JTable(modeloTabela);
         
+        //Define o tamanho preferencial de cada coluna        
         tabela.getColumnModel().getColumn(0).setPreferredWidth(40);   // ID
         tabela.getColumnModel().getColumn(1).setPreferredWidth(280);  // Livro
         tabela.getColumnModel().getColumn(2).setPreferredWidth(120);  // Data Empréstimo
@@ -65,6 +70,7 @@ public class EmprestimoAtivo extends JFrame {
         tabela.getColumnModel().getColumn(4).setPreferredWidth(80);   // Excluir
         tabela.getColumnModel().getColumn(5).setPreferredWidth(80);   // Finalizar
 
+        //Cria uma barra de rolagem para a tabela
         JScrollPane scroll = new JScrollPane(tabela);
         scroll.setBounds(30, 80, 620, 320);
         contentPane.add(scroll);
@@ -72,19 +78,27 @@ public class EmprestimoAtivo extends JFrame {
         tabela.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+            	
+            	//Identifica a linha clicada
                 int linha = tabela.getSelectedRow();
+                
+                //Identifica a coluna clicada
                 int coluna = tabela.getSelectedColumn();
 
+                //Se nenhuma linha ou coluna válida foi clicada, interrompe o método
                 if (linha == -1) {
                     return;
                 }
 
+                //Pega o ID do empréstimo da primeira coluna da linha selecionada
                 int idEmp = Integer.parseInt(tabela.getValueAt(linha, 0).toString());
 
+                //EXCLUIR
                 if (coluna == 4) {
                     excluirEmprestimo(idEmp, linha);
                 }
 
+                //FINALIZAR
                 if (coluna == 5) {
                     finalizarEmprestimo(idEmp);
                 }
@@ -93,11 +107,17 @@ public class EmprestimoAtivo extends JFrame {
 
         buscarEmprestimos();
     }
-
+    
+    
+    //Método responsável por buscar os empréstimos ativos do cliente
     private void buscarEmprestimos() {
+    	
+    	//Limpa todas as linhas da tabela antes de carregar novamente
         modeloTabela.setRowCount(0);
 
         Emprestimo emprestimo = new Emprestimo();
+        
+        // Define o cliente dentro do empréstimo dessa forma a busca será feita com base nesse cliente
         emprestimo.setCliente(cliente);
 
         ConexaoBD bd = new ConexaoBD();
@@ -107,15 +127,17 @@ public class EmprestimoAtivo extends JFrame {
 
             boolean estado = dao.buscar();
 
+            //Se encontrou empréstimos ativos
             if (estado) {
                 List<Emprestimo> lista = dao.getEmprestimos();
 
+                //Adiciona cada empréstimo como uma linha na tabela
                 for (Emprestimo emp : lista) {
                     modeloTabela.addRow(new Object[] {
                         emp.getIdEmp(),
                         emp.getLivro().getTitulo(),
-                        emp.getDataEmprestimo(),
-                        emp.getDataDevolucao(),
+                        emp.getDataEmpIni(),
+                        emp.getDataEmpEst(),
                         "Excluir",
                         "Finalizar"
                     });
@@ -128,7 +150,10 @@ public class EmprestimoAtivo extends JFrame {
         }
     }
 
+    //Método responsável por excluir um empréstimo
     private void excluirEmprestimo(int idEmp, int linha) {
+    	
+    	//Exibe uma mensagem de confirmação antes de excluir
         int opcao = JOptionPane.showConfirmDialog(
             null,
             "Deseja excluir este empréstimo?",
@@ -136,27 +161,36 @@ public class EmprestimoAtivo extends JFrame {
             JOptionPane.YES_NO_OPTION
         );
 
+        //Verifica se o usuario confirmou a exclusão
         if (opcao == JOptionPane.YES_OPTION) {
+        	
             Emprestimo emp = new Emprestimo();
+            
+            //Define o ID do empréstimo que será excluído
             emp.setIdEmp(idEmp);
 
             ConexaoBD bd = new ConexaoBD();
 
             if (bd.connect()) {
                 EmprestimoDAO dao = new EmprestimoDAO(bd, emp);
-
+                
+                //Executa a exclusão do empréstimo no banco
                 String mensagem = dao.atualizar(TipoAtualizaBD.Deletar);
 
                 JOptionPane.showMessageDialog(null, mensagem);
 
                 bd.close();
 
+                //Remove a linha da tabela após a exclusão
                 modeloTabela.removeRow(linha);
             }
         }
     }
 
+    //Método responsável por finalizar um empréstimo
     private void finalizarEmprestimo(int idEmp) {
+       
+    	//Exibe uma confirmação antes de finalizar o empréstimo
         int opcao = JOptionPane.showConfirmDialog(
             null,
             "Confirmar devolução deste livro?",
@@ -164,8 +198,12 @@ public class EmprestimoAtivo extends JFrame {
             JOptionPane.YES_NO_OPTION
         );
 
+        //Verifica se o usuário confirmou a finalização
         if (opcao == JOptionPane.YES_OPTION) {
+        	
             Emprestimo emp = new Emprestimo();
+            
+            //Define o ID do empréstimo que será finalizado
             emp.setIdEmp(idEmp);
 
             ConexaoBD bd = new ConexaoBD();
@@ -173,6 +211,7 @@ public class EmprestimoAtivo extends JFrame {
             if (bd.connect()) {
                 EmprestimoDAO dao = new EmprestimoDAO(bd, emp);
 
+                //Finaliza o empréstimo no banco de dados
                 String mensagem = dao.finalizarEmprestimo();
 
                 JOptionPane.showMessageDialog(null, mensagem);
@@ -181,4 +220,6 @@ public class EmprestimoAtivo extends JFrame {
             }
         }
     }
+    
+    
 }
