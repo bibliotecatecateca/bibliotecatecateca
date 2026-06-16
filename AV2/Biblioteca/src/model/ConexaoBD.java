@@ -65,13 +65,13 @@ public class ConexaoBD {
 		return this.connection;
 	}
 
+	//Método responsável por conectar ao banco de dados
 	public boolean connect() {
 		try {
 			String driver = "com.mysql.cj.jdbc.Driver";
 			Class.forName(driver);
 			String url = "jdbc:mysql://" + host + ":" + port + "/" + dbName;
 			connection = DriverManager.getConnection(url, login, senha);
-			System.out.println("Conectou");
 			return true;
 		}
 		catch (ClassNotFoundException erro) {
@@ -84,10 +84,10 @@ public class ConexaoBD {
 		}
 	}
 	
+	//Método responsável por fechar a conexão com o banco
 	public boolean close() {
 		try {
 			connection. close();
-			//System.out.println("Desconectou");
 			this.connection = null;
 			return true;
 		}

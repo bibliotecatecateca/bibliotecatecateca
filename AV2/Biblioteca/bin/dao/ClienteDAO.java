@@ -28,7 +28,6 @@ public class ClienteDAO implements OperacaoBD {
     }
 
     @Override
-    //Busca um cliente específico pelo CPF
     public boolean buscar() {
         sql = "SELECT cpfCliente, nomeCliente, telefoneCliente, emailCliente FROM cliente WHERE cpfCliente = ?";
 
@@ -38,7 +37,6 @@ public class ClienteDAO implements OperacaoBD {
 
             resultSet = statement.executeQuery();
 
-            //Se encontrar o cliente, preenche os dados no objeto cliente
             if (resultSet.next()) {
                 cliente.setCpf(resultSet.getString("cpfCliente"));
                 cliente.setNome(resultSet.getString("nomeCliente"));
@@ -56,7 +54,6 @@ public class ClienteDAO implements OperacaoBD {
         }
     }
 
-    //Busca todos os clientes cadastrados no banco
     public boolean buscarTodos() {
         clientes.clear();
 
@@ -66,7 +63,6 @@ public class ClienteDAO implements OperacaoBD {
             statement = bd.connection.prepareStatement(sql);
             resultSet = statement.executeQuery();
 
-            //Percorre todos os clientes encontrados
             while (resultSet.next()) {
                 Cliente cliente = new Cliente(resultSet.getString("cpfCliente"));
 
@@ -74,7 +70,6 @@ public class ClienteDAO implements OperacaoBD {
                 cliente.setTelefone(resultSet.getString("telefoneCliente"));
                 cliente.setEmail(resultSet.getString("emailCliente"));
 
-                //Adiciona o cliente na lista
                 clientes.add(cliente);
             }
 
@@ -87,7 +82,6 @@ public class ClienteDAO implements OperacaoBD {
     }
 
     @Override
-    //Define qual operação será feita
     public String atualizar(TipoAtualizaBD operacao) {
         switch (operacao) {
             case Criar:
@@ -104,7 +98,6 @@ public class ClienteDAO implements OperacaoBD {
         }
     }
 
-    //Cadastra um novo cliente no banco
     private String cadastrarCliente() {
         texto = "Cliente cadastrado com sucesso!";
 
@@ -118,7 +111,11 @@ public class ClienteDAO implements OperacaoBD {
             statement.setString(3, cliente.getTelefone());
             statement.setString(4, cliente.getEmail());
 
-            statement.executeUpdate();
+            int linhasAfetadas = statement.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                texto = "Nenhum cliente foi cadastrado.";
+            }
 
         } catch (SQLException erro) {
             texto = "Falha na operação - " + erro.getMessage();
@@ -127,8 +124,6 @@ public class ClienteDAO implements OperacaoBD {
         return texto;
     }
 
-    
-    //Altera os dados de um cliente já cadastrado
     private String alterarCliente() {
         texto = "Cliente alterado com sucesso!";
 
@@ -144,7 +139,11 @@ public class ClienteDAO implements OperacaoBD {
             statement.setString(3, cliente.getEmail());
             statement.setString(4, cliente.getCpf());
 
-            statement.executeUpdate();
+            int linhasAfetadas = statement.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                texto = "Nenhum cliente foi alterado.";
+            }
 
         } catch (SQLException erro) {
             texto = "Falha na operação - " + erro.getMessage();
@@ -153,7 +152,6 @@ public class ClienteDAO implements OperacaoBD {
         return texto;
     }
 
-    //Deleta um cliente pelo CPF
     private String deletarCliente() {
         texto = "Cliente deletado com sucesso!";
 
@@ -163,7 +161,11 @@ public class ClienteDAO implements OperacaoBD {
             statement = bd.connection.prepareStatement(sql);
             statement.setString(1, cliente.getCpf());
 
-            statement.executeUpdate();
+            int linhasAfetadas = statement.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                texto = "Nenhum cliente foi deletado.";
+            }
 
         } catch (SQLException erro) {
             texto = "Falha na operação - " + erro.getMessage();

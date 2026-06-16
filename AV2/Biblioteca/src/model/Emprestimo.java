@@ -3,101 +3,94 @@ package model;
 import java.time.LocalDate;
 
 public class Emprestimo {
-	private int idEmp;
-	private Livro livro;
-	private Cliente cliente;
-	private LocalDate dataEmprestimo;
-	private LocalDate dataDevolucao;
-	private LocalDate dataDevolucaoReal;
-	private float valorMulta;
-	
-	public Emprestimo() {
-		
-	}
-	
-	
-	public boolean EstaAtrasado() {		
-		if(this.getDataDevolucaoReal().isAfter(this.getDataDevolucao())) {
-			System.out.println("Atrasado");
-			return true;
-		} else {
-			System.out.println("Em dia");
-			return false;
-		}
-		
-	}
+    private int idEmp;
+    private Livro livro;
+    private Cliente cliente;
+    private LocalDate dataEmpIni;
+    private LocalDate dataEmpEst;
+    private LocalDate dataEmpFin;
 
-	public int getIdEmp() {
-		return this.idEmp;
-	}
-	
-	
-	public void setIdEmp(int idEmp) {
-		this.idEmp = idEmp;
-	}
-	
-	
-	public Livro getLivro() {
-		return this.livro;
-	}
-	
-	
-	public void setLivro(Livro livro) {
-		this.livro = livro;
-	}
-	
-	
-	public Cliente getCliente() {
-		return this.cliente;
-	}
-	
-	
-	public void setCliente(Cliente cliente) {
-		this.cliente = cliente;
-	}
-	
-	
-	public LocalDate getDataEmprestimo() {
-		return this.dataEmprestimo;
-	}
-	
-	
-	public void setDataEmprestimo(LocalDate dataEmprestimo) {
-		this.dataEmprestimo = dataEmprestimo;
-	}
-	
-	
-	public LocalDate getDataDevolucao() {
-		return this.dataDevolucao;
-	}
-	
-	
-	public void setDataDevolucao(LocalDate dataDevolucao) {
-		this.dataDevolucao = dataDevolucao;
-	}
-	
-	
-	public LocalDate getDataDevolucaoReal() {
-		return this.dataDevolucaoReal;
-	}
-	
-	
-	public void setDataDevolucaoReal(LocalDate dataDevolucaoReal) {
-		this.dataDevolucaoReal = dataDevolucaoReal;
-	}
-	
-	
-	public float getValorMulta() {
-		return this.valorMulta;
-	}
-	
-	
-	public void setValorMulta(float valorMulta) {
-		this.valorMulta = valorMulta;
-	}
-	
-	
-	
-	
-	
+    public Emprestimo() {
+
+    }
+
+    //Método que verifica se o livro foi devolvido com atraso
+    public boolean estaAtrasado() {
+        if (dataEmpEst == null || dataEmpFin == null) {
+            return false;
+        }
+
+        return dataEmpFin.isAfter(dataEmpEst);
+    }
+
+    //Mpétodo que calcula a multa de acordo com os dias de atraso
+    public double calcularMulta() {
+        double valorPorDia = 1.50;
+        int diasAtraso = 0;
+
+        //Se a devolução não passou da data estimada, não há multa
+        if (!dataEmpFin.isAfter(dataEmpEst)) {
+            return 0;
+        }
+
+        //Variável temporária para não alterar a data original do empréstimo
+        LocalDate dataAuxiliar = dataEmpEst;
+
+        //Conta quantos dias de atraso houve
+        while (dataAuxiliar.isBefore(dataEmpFin)){
+        	diasAtraso++;
+        	dataAuxiliar = dataAuxiliar.plusDays(1);
+        	}
+
+        //Retorna o valor total da multa
+        return diasAtraso * valorPorDia;
+    }
+
+    public int getIdEmp() {
+        return idEmp;
+    }
+
+    public void setIdEmp(int idEmp) {
+        this.idEmp = idEmp;
+    }
+
+    public Livro getLivro() {
+        return livro;
+    }
+
+    public void setLivro(Livro livro) {
+        this.livro = livro;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public LocalDate getDataEmpIni() {
+        return dataEmpIni;
+    }
+
+    public void setDataEmpIni(LocalDate dataEmpIni) {
+        this.dataEmpIni = dataEmpIni;
+    }
+
+    public LocalDate getDataEmpEst() {
+        return dataEmpEst;
+    }
+
+    public void setDataEmpEst(LocalDate dataEmpEst) {
+        this.dataEmpEst = dataEmpEst;
+    }
+
+    public LocalDate getDataEmpFin() {
+        return dataEmpFin;
+    }
+
+    public void setDataEmpFin(LocalDate dataEmpFin) {
+        this.dataEmpFin = dataEmpFin;
+    }
 }

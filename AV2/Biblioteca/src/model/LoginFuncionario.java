@@ -1,16 +1,17 @@
 package model;
 
-public class LoginFunc {
+public class LoginFuncionario {
 	private int idLogin;
 	private String usuario;
 	private String senha;
 	
-	public LoginFunc(String usuario, String senha) {
+	public LoginFuncionario(String usuario, String senha) {
 		this.setIdLogin(idLogin);
 		this.setUsuario(usuario);
 		this.setSenha(senha);
 	}
 	
+	//Método que valida se o usuário e a senha digitados são iguais aos cadastrados
 	public boolean validarLogin(String usuario, String senha) {
 		if(this.usuario.equals(usuario) && this.senha.equals(senha)) {
 			return true;

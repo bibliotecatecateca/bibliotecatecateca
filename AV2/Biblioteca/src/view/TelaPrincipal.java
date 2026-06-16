@@ -6,7 +6,7 @@ import javax.swing.JTabbedPane;
 public class TelaPrincipal extends JFrame {
 	
 	//Classe que cria abas
-   private JTabbedPane abas;
+	private JTabbedPane abas;
 
     public TelaPrincipal() {
     	//Comportamento do X(fechar) da tela
@@ -18,20 +18,18 @@ public class TelaPrincipal extends JFrame {
         setResizable(false);
 
         setTitle("Sistema Biblioteca");
-        //Deixa a tela cheia
-        
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        getContentPane().setLayout(null);
 
+        //Cria abas
         abas = new JTabbedPane();
         getContentPane().setLayout(new java.awt.BorderLayout());
         getContentPane().add(abas, java.awt.BorderLayout.CENTER);
         
         AbaLivros abaLivros = new AbaLivros();
+        //Adiciona a aba "Livros"
         abas.addTab("Livros", abaLivros);
+        //Adiciona a aba "Empréstimos"
         abas.addTab("Empréstimos", new AbaEmprestimo());
 
-        getContentPane().add(abas);
 
         setVisible(true);
     }

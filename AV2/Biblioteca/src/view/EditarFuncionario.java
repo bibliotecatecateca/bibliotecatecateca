@@ -25,6 +25,7 @@ public class EditarFuncionario extends JFrame {
     private JTextField tfNome;
     private JTextField tfSenha;
 
+    //Recebe o funcionário que será editado e a tela FuncionariosAtivos para atualizar a tabela depois da alteração
     public EditarFuncionario(Funcionario funcionario, FuncionariosAtivos telaFuncionarios) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 400, 250);
@@ -68,6 +69,8 @@ public class EditarFuncionario extends JFrame {
         btnAtualizar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+            	
+                //Atualiza o objeto funcionario com os novos dados digitados
                 funcionario.setNome(tfNome.getText());
                 funcionario.getLogin().setSenha(tfSenha.getText());
 
@@ -76,12 +79,14 @@ public class EditarFuncionario extends JFrame {
                 if (bd.connect()) {
                     FuncionarioDAO dao = new FuncionarioDAO(bd, funcionario);
 
+                    //Atualiza os dados do funcionario no banco de dados
                     String mensagem = dao.atualizar(TipoAtualizaBD.Alterar);
 
                     JOptionPane.showMessageDialog(null, mensagem);
 
                     bd.close();
 
+                    //Atualiza a tabela de funcionarios na tela FuncionariosAtivos
                     telaFuncionarios.buscarFuncionarios();
 
                     dispose();
