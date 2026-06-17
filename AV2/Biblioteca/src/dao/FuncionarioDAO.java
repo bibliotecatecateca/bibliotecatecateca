@@ -1,6 +1,6 @@
 package dao;
 
-import model.LoginFunc;
+import model.LoginFuncionario;
 import model.Funcionario;
 
 import java.sql.PreparedStatement;
@@ -13,33 +13,33 @@ import model.ConexaoBD;
 import model.OperacaoBD;
 import model.TipoAtualizaBD;
 
-public class FuncionarioDAO implements OperacaoBD{
-	private ConexaoBD bd;
-	private Funcionario funcionario;
-	private ArrayList<Funcionario> funcionarios;
-	private LoginFunc login;
-	private String sql;
-	private String texto;
+public class FuncionarioDAO implements OperacaoBD {
+
+    private ConexaoBD bd;
+    private Funcionario funcionario;
+    private ArrayList<Funcionario> funcionarios;
+    private LoginFuncionario login;
+    private String sql;
+    private String texto;
     private PreparedStatement statement;
     private ResultSet resultSet;
-    
+
     public FuncionarioDAO(ConexaoBD bd, Funcionario funcionario) {
         this.bd = bd;
         this.funcionario = funcionario;
         this.funcionarios = new ArrayList<>();
 
+        //Se o funcionário não for nulo, pega os dados de login dele
         if (funcionario != null) {
             this.login = funcionario.getLogin();
         }
-    		
     }
-    
-  //Código para verificar se o login existe no banco
-    @Override
-	public boolean buscar() {
 
-        // CASO 1: buscar todos os funcionários
-        // usado na tela FuncionariosAtivos
+    @Override
+    //Método responsável por buscar funcionários
+    public boolean buscar() {
+
+        //Caso o funcionário seja nulo, busca todos os funcionários usado na tela FuncionariosAtivos
         if (funcionario == null) {
             funcionarios.clear();
 
@@ -49,14 +49,15 @@ public class FuncionarioDAO implements OperacaoBD{
                 statement = bd.connection.prepareStatement(sql);
                 resultSet = statement.executeQuery();
 
+                //Percorre os funcionários encontrados no banco
                 while (resultSet.next()) {
-                    LoginFunc login = new LoginFunc(
+                    LoginFuncionario login = new LoginFuncionario(
                         resultSet.getString("loginFunc"),
                         resultSet.getString("senhaFunc")
                     );
 
                     Funcionario func = new Funcionario(login);
-                    func.setIdFunc(resultSet.getInt("idFunc"));
+                    func.setIdFuncionario(resultSet.getInt("idFunc"));
                     func.setNome(resultSet.getString("nomeFunc"));
 
                     funcionarios.add(func);
@@ -70,8 +71,7 @@ public class FuncionarioDAO implements OperacaoBD{
             }
         }
 
-        // CASO 2: buscar um funcionário pelo login
-        // usado na TelaLogin
+        //Caso tenha um funcionário, busca pelo login usado na TelaLogin
         sql = "SELECT idFunc, nomeFunc, loginFunc, senhaFunc FROM funcionario WHERE loginFunc = ?";
 
         try {
@@ -80,8 +80,9 @@ public class FuncionarioDAO implements OperacaoBD{
 
             resultSet = statement.executeQuery();
 
+            //Se encontrar o funcionário, preenche os dados dele
             if (resultSet.next()) {
-                funcionario.setIdFunc(resultSet.getInt("idFunc"));
+                funcionario.setIdFuncionario(resultSet.getInt("idFunc"));
                 funcionario.setNome(resultSet.getString("nomeFunc"));
 
                 login.setUsuario(resultSet.getString("loginFunc"));
@@ -98,102 +99,89 @@ public class FuncionarioDAO implements OperacaoBD{
         }
     }
 
-    public List<Funcionario> getFuncionarios() {
-        return funcionarios;
+    @Override
+    //Método que escolhe qual operação será feita
+    public String atualizar(TipoAtualizaBD operacao) {
+        switch (operacao) {
+            case Criar:
+                return cadastrarFuncionario();
+
+            case Alterar:
+                return alterarFuncionario();
+
+            case Deletar:
+                return deletarFuncionario();
+
+            default:
+                return "Operação Inválida";
+        }
     }
-	
-	
-	
-	@Override
-	public String atualizar(TipoAtualizaBD operacao) {
-		switch(operacao) {
-		case Criar:
-			return cadastrarFuncionario();
-		case Alterar:
-			return alterarFuncionario();
-		case Deletar:
-			return deletarFuncionario();
-		default:
-			return "Operação Inválida";
-			
-		}
-		
-	}
-	
-	private String cadastrarFuncionario() {
+
+    //Método responsável por cadastrar funcionário
+    private String cadastrarFuncionario() {
         texto = "Funcionário cadastrado com sucesso!";
-        
+
         try {
-        	 	sql = "INSERT into funcionario(nomeFunc, loginFunc, senhaFunc) values (?,?,?)"; 
-        	 	
-            statement = bd.connection.prepareCall(sql);
+            sql = "INSERT INTO funcionario(nomeFunc, loginFunc, senhaFunc) VALUES (?, ?, ?)";
+
+            statement = bd.connection.prepareStatement(sql);
 
             statement.setString(1, funcionario.getNome());
             statement.setString(2, funcionario.getLogin().getUsuario());
             statement.setString(3, funcionario.getLogin().getSenha());
-            
-            //Executa o comando no banco de dados
-            statement.execute();
-           	}
-        //Erro durante a comunicação com um banco
-        catch (SQLException erro) {
+
+            statement.executeUpdate();
+
+
+        } catch (SQLException erro) {
             texto = "Falha na operação - " + erro.getMessage();
         }
-        
-        return texto;	
-	}
-	
-	private String alterarFuncionario() {
-		texto = "Funcionário alterado com sucesso!";
-		
-		try {
-			sql = "UPDATE funcionario SET nomeFunc = ?, senhaFunc = ? WHERE idFunc = ?"; 
-			
+
+        return texto;
+    }
+
+    //Método responsável por alterar nome e senha do funcionário
+    private String alterarFuncionario() {
+        texto = "Funcionário alterado com sucesso!";
+
+        try {
+            sql = "UPDATE funcionario SET nomeFunc = ?, senhaFunc = ? WHERE idFunc = ?";
+
             statement = bd.connection.prepareStatement(sql);
 
             statement.setString(1, funcionario.getNome());
             statement.setString(2, funcionario.getLogin().getSenha());
-            statement.setInt(3, funcionario.getIdFunc());
-            
-            //Executa o comando no banco de dados
-            statement.execute();
-			
-		} 
-		//Erro durante a comunicação com um banco
-		catch (SQLException erro) {
-			texto = "Falha na operação - " + erro.getMessage();
-			
-		}
-		
-		return texto;
-		
-	}
-	
-	private String deletarFuncionario() {
-		texto = "Funcionário deletado com sucesso!";
-		
-		try {
-			sql = "DELETE FROM funcionario WHERE idFunc = ?"; 
-			
+            statement.setInt(3, funcionario.getIdFuncionario());
+
+            statement.executeUpdate();
+
+        } catch (SQLException erro) {
+            texto = "Falha na operação - " + erro.getMessage();
+        }
+
+        return texto;
+    }
+
+    //Método responsável por deletar funcionário pelo id
+    private String deletarFuncionario() {
+        texto = "Funcionário deletado com sucesso!";
+
+        try {
+            sql = "DELETE FROM funcionario WHERE idFunc = ?";
+
             statement = bd.connection.prepareStatement(sql);
+            statement.setInt(1, funcionario.getIdFuncionario());
+
+            statement.executeUpdate();
             
-            statement.setInt(1, funcionario.getIdFunc());
-            
-            //Executa o comando no banco de dados
-            statement.execute();
-			
-		}
-		//Erro durante a comunicação com um banco
-		catch (SQLException erro) {
-			texto = "Falha na operação - " + erro.getMessage();
-		}
-		
-		return texto;
-		
-	}
+        } catch (SQLException erro) {
+            texto = "Falha na operação - " + erro.getMessage();
+        }
 
-
-
-
-
+        return texto;
+    }
+    
+    public List<Funcionario> getFuncionarios() {
+        return funcionarios;
+    }
 }
