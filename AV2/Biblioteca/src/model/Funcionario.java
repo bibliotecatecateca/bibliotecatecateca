@@ -1,24 +1,24 @@
 package model;
 
 public class Funcionario {
-	private int idFunc;
+	private int idFuncionario;
 	private String nome;
-	private LoginFunc login;
+	private LoginFuncionario login;
 	
-	public Funcionario(LoginFunc login){
-		this.setIdFunc(0);
+	public Funcionario(LoginFuncionario login){
+		this.setIdFuncionario(0);
 		this.setNome(null);
 		this.setLogin(login);
 	}
 	
 	
 	
-	public int getIdFunc() {
-		return this.idFunc;
+	public int getIdFuncionario() {
+		return this.idFuncionario;
 	}
 	
-	public void setIdFunc(int idFunc) {
-		this.idFunc = idFunc;
+	public void setIdFuncionario(int idFuncionario) {
+		this.idFuncionario = idFuncionario;
 	}
 	
 	public String getNome() {
@@ -29,11 +29,11 @@ public class Funcionario {
 		this.nome = nome;
 	}
 	
-	public LoginFunc getLogin() {
+	public LoginFuncionario getLogin() {
 		return this.login;
 	}
 	
-	public void setLogin(LoginFunc login) {
+	public void setLogin(LoginFuncionario login) {
 		this.login = login;
 	}
 	

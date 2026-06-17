@@ -26,6 +26,21 @@ public class EditarCliente extends JFrame {
     private JTextField tfNome;
     private JTextField tfTelefone;
     private JTextField tfEmail;
+    
+    
+    //Método responsável por remover tudo que não for número do telefone
+    // (21) 9XXXX-XXXX = 219XXXXXXXX / 21 9XXXXXXXX = 219XXXXXXXX 
+    private String limparTelefone(String telefone) {
+        return telefone.replaceAll("[^0-9]", "");
+    }
+
+    //Método responsável por formatar o telefone
+    //11987654321 vira (11) 98765-4321
+    private String formatarTelefone(String telefone) {
+        return "(" + telefone.substring(0, 2) + ") " +
+               telefone.substring(2, 7) + "-" +
+               telefone.substring(7, 11);
+    }
 
     public EditarCliente(Cliente cliente, ClientesAtivos telaClientes) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -89,15 +104,38 @@ public class EditarCliente extends JFrame {
         btnAtualizar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                String nome = tfNome.getText();
-                String telefone = tfTelefone.getText();
-                String email = tfEmail.getText();
+            	
+            	//Pega o que foi digitado e remove os espaços extras com o .trim()
+                String nome = tfNome.getText().trim();
+                String telefoneDigitado = tfTelefone.getText().trim();
+                String email = tfEmail.getText().trim();
 
-                if (nome.isEmpty() || telefone.isEmpty() || email.isEmpty()) {
+                //Cria uma variavel com o que foi digitado no campo de telefone 
+                //e chama o método que remove tudo que não é número do telefone
+                String telefoneLimpo = limparTelefone(telefoneDigitado);
+
+                //Verifica se algum campo está vazio
+                if (nome.isEmpty() || telefoneDigitado.isEmpty() || email.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Preencha todos os campos.");
                     return;
                 }
 
+                //Verifica se o telefone possui exatamente 11 números
+                if (telefoneLimpo.length() != 11) {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Telefone inválido. Digite exatamente 11 números. Exemplo: 11987654321"
+                    );
+                    return;
+                }
+
+                //Formata o telefone que havia sido limpo
+                String telefone = formatarTelefone(telefoneLimpo);
+                
+                //Atualiza o campo da tela com o telefone formatado
+                tfTelefone.setText(telefone);
+
+                //Atualiza o objeto cliente com os dados digitados nos campos
                 cliente.setNome(nome);
                 cliente.setTelefone(telefone);
                 cliente.setEmail(email);
@@ -107,14 +145,17 @@ public class EditarCliente extends JFrame {
                 if (bd.connect()) {
                     ClienteDAO dao = new ClienteDAO(bd, cliente);
 
+                    //Atualiza os dados do cliente no banco de dados
                     String mensagem = dao.atualizar(TipoAtualizaBD.Alterar);
 
                     JOptionPane.showMessageDialog(null, mensagem);
 
                     bd.close();
 
+                    //Atualiza a lista de clientes na tela ClientesAtivos
                     telaClientes.buscarClientes();
 
+                    //Fecha a tela de edição
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(null, "Erro ao conectar com o banco de dados.");

@@ -26,14 +26,10 @@ public class AbaEditarLivro extends JFrame {
 	private JTextField tfAutor;
 	private JTextField tfGenero;
 	private JTextField tfEditora;
-	/**
-	 * Launch the application.
-	 */
 
 
-	/**
-	 * Create the frame.
-	 */
+	//Recebe um objeto Livro que tem os dados do livro que serão editados
+	//e tela AbaLivros, para atualizar a lista após a edição
 	public AbaEditarLivro(Livro livro, AbaLivros abaLivros) {
 	    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -97,48 +93,63 @@ public class AbaEditarLivro extends JFrame {
 		contentPane.add(tfEditora);
 		tfEditora.setColumns(10);
 		
+		
+		//Preenche os campos da tela com os dados atuais do livro selecionado para edição
 		tfTitulo.setText(livro.getTitulo());
 		tfAutor.setText(livro.getAutor());
 		tfGenero.setText(livro.getGenero());
 		tfEditora.setText(livro.getEditora());
 		
-		JButton btnNewButton = new JButton("Atualizar");
-		btnNewButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-			    livro.setTitulo(tfTitulo.getText());
-			    livro.setAutor(tfAutor.getText());
-			    livro.setGenero(tfGenero.getText());
-			    livro.setEditora(tfEditora.getText());
+		JButton btnAtualizar = new JButton("Atualizar");
+		btnAtualizar.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
 
-			    ConexaoBD bd = new ConexaoBD();
+		    	
+		    	//Pega o que foi digitado e remove os espaços extras com o .trim()
+		        String titulo = tfTitulo.getText().trim();
+		        String autor = tfAutor.getText().trim();
+		        String genero = tfGenero.getText().trim();
+		        String editora = tfEditora.getText().trim();
 
-			    if (bd.connect()) {
+		        
+		        //Verifica se todos os campos estão digitados e se não printa avisando
+		        if (titulo.isEmpty() || autor.isEmpty() || genero.isEmpty() || editora.isEmpty()) {
+		            JOptionPane.showMessageDialog(null, "Preencha todos os campos.");
+		            return;
+		        }
 
-			        LivroDAO livroDAO = new LivroDAO(bd, livro);
-			        
-			        String mensagem = livroDAO.atualizar(TipoAtualizaBD.Alterar);
+		        //Atualiza o objeto com os dados de cada campo
+		        livro.setTitulo(titulo);
+		        livro.setAutor(autor);
+		        livro.setGenero(genero);
+		        livro.setEditora(editora);
 
-			        JOptionPane.showMessageDialog(null, mensagem);
+		        ConexaoBD bd = new ConexaoBD();
 
-			        bd.close();
+		        if (bd.connect()) {
+		            LivroDAO livroDAO = new LivroDAO(bd, livro);
 
-			        abaLivros.buscarLivros();
+		            //Atualiza o livro no banco
+		            String mensagem = livroDAO.atualizar(TipoAtualizaBD.Alterar);
 
-			        dispose();
+		            JOptionPane.showMessageDialog(null, mensagem);
 
-			    } else {
-			        JOptionPane.showMessageDialog(
-			            null,
-			            "Erro ao conectar ao banco."
-			        );
-			    }
-				
-			}
+		            bd.close();
+
+		            //Atualiza a página usando o para buscar os livros novamente
+		            abaLivros.buscarLivros();
+
+		            dispose();
+
+		        } else {
+		            JOptionPane.showMessageDialog(null, "Erro ao conectar ao banco.");
+		        }
+		    }
 		});
-		btnNewButton.setFont(new Font("Arial", Font.PLAIN, 10));
-		btnNewButton.setBounds(172, 205, 84, 20);
-		contentPane.add(btnNewButton);
+		btnAtualizar.setFont(new Font("Arial", Font.PLAIN, 10));
+		btnAtualizar.setBounds(172, 205, 84, 20);
+		contentPane.add(btnAtualizar);
 
 	}
 

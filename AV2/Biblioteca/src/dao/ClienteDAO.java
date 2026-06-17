@@ -11,168 +11,168 @@ import model.ConexaoBD;
 import model.OperacaoBD;
 import model.TipoAtualizaBD;
 
-public class ClienteDAO implements OperacaoBD{
-	private ConexaoBD bd;
-	private Cliente cliente;
-	private ArrayList<Cliente> clientes;
-	private String sql;
-	private String texto;
+public class ClienteDAO implements OperacaoBD {
+
+    private ConexaoBD bd;
+    private Cliente cliente;
+    private ArrayList<Cliente> clientes;
+    private String sql;
+    private String texto;
     private PreparedStatement statement;
     private ResultSet resultSet;
 
-	public ClienteDAO(ConexaoBD bd, Cliente cliente) {
-		this.bd = bd;
-		this.cliente = cliente;
-	    this.clientes = new ArrayList<>();
-	}
+    public ClienteDAO(ConexaoBD bd, Cliente cliente) {
+        this.bd = bd;
+        this.cliente = cliente;
+        this.clientes = new ArrayList<>();
+    }
 
+    @Override
+    //Busca um cliente específico pelo CPF
+    public boolean buscar() {
+        sql = "SELECT cpfCliente, nomeCliente, telefoneCliente, emailCliente FROM cliente WHERE cpfCliente = ?";
 
-	@Override
-    //Código para verificar se o cliente existe no banco
-	public boolean buscar() {
-		//sql = "SELECT * FROM funcionario where codigo = ?";
-	    sql = "{call conCliente(?)}";
-	    try {
-	    	statement = bd.connection.prepareCall(sql);
-	        statement.setString(1, cliente.getCpf());
-
-	        resultSet = statement.executeQuery();
-	            
-	        //Se achar ele preenche a classe funcionario
-	        if(resultSet.next()) {
-	        	cliente.setCpf( resultSet.getString(1) );
-	            cliente.setNome( resultSet.getString(2) );
-	            cliente.setTelefone( resultSet.getString(3) );
-	            cliente.setEmail( resultSet.getString(4) );		
-	            return true;
-	                
-	        } else {
-	        	
-	        }
-	         	return false;
-	            
-	            
-	    }
-	    catch (SQLException erro) {
-	    	return false;
-	    	}
-		}
-		
-
-	@Override
-	public String atualizar(TipoAtualizaBD operacao) {
-  		switch(operacao) {
-  		case Criar:
-  			return cadastrarCliente();
-  		case Alterar:
-  			return alterarCliente();
-  		case Deletar:
-  			return deletarCliente();
-  		default:
-  			return "Operação Inválida";
-  			
-  		}
-	}
-	
-  	private String cadastrarCliente() {
-        texto = "Cliente cadastrado com sucesso!";
-        
         try {
-      	  sql = "INSERT into cliente(cpfCliente, nomeCliente, telefoneCliente, emailCliente) values (?,?,?,?)";
-        	 	
-            statement = bd.connection.prepareCall(sql);
+            statement = bd.connection.prepareStatement(sql);
+            statement.setString(1, cliente.getCpf());
+
+            resultSet = statement.executeQuery();
+
+            //Se encontrar o cliente, preenche os dados no objeto cliente
+            if (resultSet.next()) {
+                cliente.setCpf(resultSet.getString("cpfCliente"));
+                cliente.setNome(resultSet.getString("nomeCliente"));
+                cliente.setTelefone(resultSet.getString("telefoneCliente"));
+                cliente.setEmail(resultSet.getString("emailCliente"));
+
+                return true;
+            }
+
+            return false;
+
+        } catch (SQLException erro) {
+            System.out.println("Erro ao buscar cliente: " + erro.getMessage());
+            return false;
+        }
+    }
+
+    //Busca todos os clientes cadastrados no banco
+    public boolean buscarTodos() {
+        clientes.clear();
+
+        sql = "SELECT cpfCliente, nomeCliente, telefoneCliente, emailCliente FROM cliente";
+
+        try {
+            statement = bd.connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+
+            //Percorre todos os clientes encontrados
+            while (resultSet.next()) {
+                Cliente cliente = new Cliente(resultSet.getString("cpfCliente"));
+
+                cliente.setNome(resultSet.getString("nomeCliente"));
+                cliente.setTelefone(resultSet.getString("telefoneCliente"));
+                cliente.setEmail(resultSet.getString("emailCliente"));
+
+                //Adiciona o cliente na lista
+                clientes.add(cliente);
+            }
+
+            return true;
+
+        } catch (SQLException erro) {
+            System.out.println("Erro ao buscar clientes: " + erro.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    //Define qual operação será feita
+    public String atualizar(TipoAtualizaBD operacao) {
+        switch (operacao) {
+            case Criar:
+                return cadastrarCliente();
+
+            case Alterar:
+                return alterarCliente();
+
+            case Deletar:
+                return deletarCliente();
+
+            default:
+                return "Operação Inválida";
+        }
+    }
+
+    //Cadastra um novo cliente no banco
+    private String cadastrarCliente() {
+        texto = "Cliente cadastrado com sucesso!";
+
+        try {
+            sql = "INSERT INTO cliente (cpfCliente, nomeCliente, telefoneCliente, emailCliente) VALUES (?, ?, ?, ?)";
+
+            statement = bd.connection.prepareStatement(sql);
 
             statement.setString(1, cliente.getCpf());
             statement.setString(2, cliente.getNome());
             statement.setString(3, cliente.getTelefone());
             statement.setString(4, cliente.getEmail());
 
-            
-            //Executa o comando no banco de dados
-            statement.execute();
-           	}
-        //Erro durante a comunicação com um banco
-        catch (SQLException erro) {
+            statement.executeUpdate();
+
+        } catch (SQLException erro) {
             texto = "Falha na operação - " + erro.getMessage();
         }
-        
-        return texto;	
-	}
-	
-  	private String alterarCliente() {
-  		texto = "Cliente alterado com sucesso!";
-  		
-  		try {
-  			sql = "UPDATE cliente SET nomeCliente = ?, telefoneCliente = ?, emailCliente = ? WHERE cpfCliente = ?";
-  			
-              statement = bd.connection.prepareCall(sql);
 
-              statement.setString(1, cliente.getNome());
-              statement.setString(2, cliente.getTelefone());
-              statement.setString(3, cliente.getEmail());
-              statement.setString(4, cliente.getCpf());
-              
-              //Executa o comando no banco de dados
-              statement.execute();
-  			
-  		} 
-  		//Erro durante a comunicação com um banco
-  		catch (SQLException erro) {
-  			texto = "Falha na operação - " + erro.getMessage();
-  			
-  		}
-  		
-  		return texto;
-  		
-  	}
-	
-  	private String deletarCliente() {
-  	    texto = "Cliente deletado com sucesso!";
+        return texto;
+    }
 
-  	    try {
-  	        sql = "DELETE FROM cliente WHERE cpfCliente = ?";
+    
+    //Altera os dados de um cliente já cadastrado
+    private String alterarCliente() {
+        texto = "Cliente alterado com sucesso!";
 
-  	        statement = bd.connection.prepareStatement(sql);
-  	        statement.setString(1, cliente.getCpf());
+        try {
+            sql = "UPDATE cliente " +
+                  "SET nomeCliente = ?, telefoneCliente = ?, emailCliente = ? " +
+                  "WHERE cpfCliente = ?";
 
-  	        statement.executeUpdate();
+            statement = bd.connection.prepareStatement(sql);
 
-  	    } catch (SQLException erro) {
-  	        texto = "Falha na operação - " + erro.getMessage();
-  	    }
+            statement.setString(1, cliente.getNome());
+            statement.setString(2, cliente.getTelefone());
+            statement.setString(3, cliente.getEmail());
+            statement.setString(4, cliente.getCpf());
 
-  	    return texto;
-   }
-  	
-  	public boolean buscarTodos() {
-  	    clientes.clear();
+            statement.executeUpdate();
 
-  	    sql = "SELECT cpfCliente, nomeCliente, telefoneCliente, emailCliente FROM cliente";
+        } catch (SQLException erro) {
+            texto = "Falha na operação - " + erro.getMessage();
+        }
 
-  	    try {
-  	        statement = bd.connection.prepareStatement(sql);
-  	        resultSet = statement.executeQuery();
+        return texto;
+    }
 
-  	        while (resultSet.next()) {
-  	            Cliente cliente = new Cliente(resultSet.getString("cpfCliente"));
+    //Deleta um cliente pelo CPF
+    private String deletarCliente() {
+        texto = "Cliente deletado com sucesso!";
 
-  	            cliente.setNome(resultSet.getString("nomeCliente"));
-  	            cliente.setTelefone(resultSet.getString("telefoneCliente"));
-  	            cliente.setEmail(resultSet.getString("emailCliente"));
+        try {
+            sql = "DELETE FROM cliente WHERE cpfCliente = ?";
 
-  	            clientes.add(cliente);
-  	        }
+            statement = bd.connection.prepareStatement(sql);
+            statement.setString(1, cliente.getCpf());
 
-  	        return true;
+            statement.executeUpdate();
 
-  	    } catch (SQLException erro) {
-  	        System.out.println("Erro ao buscar clientes: " + erro.getMessage());
-  	        return false;
-  	    }
-  	}
+        } catch (SQLException erro) {
+            texto = "Falha na operação - " + erro.getMessage();
+        }
 
-  	public List<Cliente> getClientes() {
-  	    return clientes;
-  	}
+        return texto;
+    }
 
+    public List<Cliente> getClientes() {
+        return clientes;
+    }
 }
